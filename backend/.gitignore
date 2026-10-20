@@ -1,0 +1,6 @@
+# .gitignore
+.env
+venv/
+tms.db
+__pycache__/
+*.pyc

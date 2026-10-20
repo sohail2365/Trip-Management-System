@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════
+   DESIGN TOKENS — Theme yahan se change hota hai
+   Har color RGB format mein (space-separated, no commas)
+   Ye opacity modifier support karta hai: bg-primary/50
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  --brand-primary: 16 185 129;       /* Green-500 */
+  --brand-primary-dark: 5 150 105;   /* Green-600 */
+  --brand-primary-soft: 209 250 229; /* Green-100 */
+
+  /* Semantic Colors */
+  --color-success: 34 197 94;       /* Green-500 */
+  --color-warning: 251 146 60;      /* Orange-400 */
+  --color-danger: 239 68 68;        /* Red-500 */
+  --color-info: 14 165 233;         /* Sky-500 */
+
+  /* Surfaces (Backgrounds) */
+  --surface-bg: 243 244 246;        /* Gray-100 */
+  --surface-card: 255 255 255;      /* White */
+  --surface-border: 229 231 235;    /* Gray-200 */
+  --surface-hover: 249 250 251;     /* Gray-50 */
+
+  /* Sidebar */
+  --sidebar-bg: 6 78 59;             /* Dark green */
+  --sidebar-bg-hover: 51 65 85;     /* Slate-700 */
+  --sidebar-text: 203 213 225;      /* Slate-300 */
+  --sidebar-text-active: 255 255 255;
+  --sidebar-border: 51 65 85;
+
+  /* Text */
+  --text-primary: 30 41 59;         /* Slate-800 */
+  --text-secondary: 71 85 105;      /* Slate-600 */
+  --text-muted: 148 163 184;        /* Slate-400 */
+
+  /* Radius — shape change karne ke liye */
+  --radius-sm: 0.rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+}
+
+/* Base styles */
+body {
+  background-color: rgb(var(--surface-bg));
+  color: rgb(var(--text-primary));
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  margin: 0;
+}
+
+/* Smooth transitions globally */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: ease;
+}
+
+/* Scrollbar (optional polish) */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgb(var(--surface-border));
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(var(--text-muted));
+}
+@media print {
+  aside, button, .print\:hidden {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  body {
+    background: white !important;
+  }
+}
+/* ═══════════════════════════════════════════════════════
+   PRINT STYLES
+   ═══════════════════════════════════════════════════════ */
+@media print {
+  /* Hide everything except receipt paper */
+  aside,
+  nav,
+  button,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Receipt paper full width */
+  #receipt-paper {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 20mm !important;
+    max-width: 100% !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  /* Avoid breaking inside sections */
+  section,
+  header,
+  footer,
+  table {
+    page-break-inside: avoid;
+  }
+}
