@@ -11,25 +11,6 @@ from app.routers import (
     staff_payments, routes,
 )
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    await init_db()
-    print("✅ Database ready")
-
-    # Start background tasks
-    task = start_background_tasks()
-    print("🔄 Background scheduler started")
-
-    yield
-
-    # Shutdown
-    task.cancel()
-    try:
-        await task
-    except asyncio.CancelledError:
-        pass
-    print("👋 Shutting down")
-
 app = FastAPI(title="TMS Backend", lifespan=lifespan)
 
 app.add_middleware(
