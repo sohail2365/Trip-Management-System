@@ -1,14 +1,17 @@
 ﻿{
-  "builds": [
-    {
-      "src": "app/main.py",
-      "use": "@vercel/python"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "api": {
+      "root": ".",
+      "entrypoint": "app.main:app"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "app/main.py"
+      "source": "/(.*)",
+      "destination": {
+        "service": "api"
+      }
     }
   ]
 }
