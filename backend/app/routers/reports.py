@@ -16,7 +16,7 @@ async def vehicle_report(
     vehicle_id: int,
     from_date: date = Query(...),
     to_date: date = Query(...),
-    group_by: str = Query("month", regex="^(week|month|year)$"),
+    group_by: str = Query("month", pattern="^(week|month|year)$"),
     db: AsyncSession = Depends(get_db),
     user=Depends(current_user),
 ):

@@ -1,17 +1,12 @@
-import asyncio
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
-from app.database import init_db
-from app.scheduler import start_background_tasks
 from app.routers import (
     auth, clients, fuel, vehicles, drivers, conductors,
     trips, dashboard, settings, receipts, maintenance, reports,
     staff_payments, routes,
 )
 
-app = FastAPI(title="TMS Backend", lifespan=lifespan)
+app = FastAPI(title="TMS Backend")
 
 app.add_middleware(
     CORSMiddleware,
