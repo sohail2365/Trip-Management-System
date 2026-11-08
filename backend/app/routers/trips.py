@@ -1,13 +1,13 @@
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.deps import current_user
 from app.models import (
-    Trip, TripVehicle, Client, Vehicle, Driver, Conductor, FuelRate, TripWaypoint, StaffPayment
+    Trip, TripVehicle, Client, Vehicle, Driver, Conductor, FuelRate, TripWaypoint, StaffPayment, Receipt
 )
 from app.schemas import TripIn, TripOut, TripSummary, TripUpdate
 
@@ -460,6 +460,10 @@ async def delete_trip(trip_id: int, db: AsyncSession = Depends(get_db), user=Dep
     trip = await db.get(Trip, trip_id)
     if not trip:
         raise HTTPException(404, "Trip nahi mili")
+
+    await db.execute(
+        update(Receipt).where(Receipt.trip_id == trip_id).values(trip_id=None)
+    )
     await db.delete(trip)
     await db.commit()
 
