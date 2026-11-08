@@ -76,7 +76,6 @@ export default function Vehicles() {
         reg_no: form.reg_no.trim(),
         diary_number: form.diary_number.trim() || null,
         model: form.model.trim(),
-        // Agar mileage khali ho to 4.0 default bhejein taake 422 na aaye
         mileage_kmpl: Number(form.mileage_kmpl) || 4.0, 
       };
       
@@ -88,7 +87,6 @@ export default function Vehicles() {
       closeForm();
       await load();
     } catch (err) {
-      // React error #31 fix: Error object ko properly read karein
       const detail = err.response?.data?.detail;
       if (Array.isArray(detail)) {
         setError(detail.map((d) => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(', '));
@@ -229,6 +227,16 @@ export default function Vehicles() {
             onChange={(e) => update('diary_number', e.target.value)}
             placeholder="D-001"
           />
+          
+          {/* Yahan Model ka field add kar diya gaya hai */}
+          <Input
+            label="Model"
+            value={form.model}
+            onChange={(e) => update('model', e.target.value)}
+            required
+            placeholder="Hino AK"
+          />
+
           <Input
             label="Mileage (KM/L)"
             type="number"
