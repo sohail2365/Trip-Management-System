@@ -73,11 +73,13 @@ export default function Vehicles() {
     setError(null);
     try {
       const payload = {
-        reg_no: form.reg_no,
-        diary_number: form.diary_number || null,
-        model: form.model,
-        mileage_kmpl: Number(form.mileage_kmpl),
+        reg_no: form.reg_no.trim(),
+        diary_number: form.diary_number.trim() || null,
+        model: form.model.trim(),
+        // Agar mileage khali ho to 4.0 default bhejein taake 422 na aaye
+        mileage_kmpl: Number(form.mileage_kmpl) || 4.0, 
       };
+      
       if (editing) {
         await api.put(`/vehicles/${editing.id}`, payload);
       } else {
@@ -86,7 +88,13 @@ export default function Vehicles() {
       closeForm();
       await load();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Save nahi hua');
+      // React error #31 fix: Error object ko properly read karein
+      const detail = err.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map((d) => `${d.loc[d.loc.length - 1]}: ${d.msg}`).join(', '));
+      } else {
+        setError(detail || 'Save nahi hua. Data check karein.');
+      }
     } finally {
       setSaving(false);
     }
