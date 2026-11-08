@@ -1,19 +1,26 @@
 {
-    "services": {
-      "api": {
-        "root": "backend",
-        "entrypoint": "app.main:app"
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "entrypoint": "package.json"
+    },
+    "backend": {
+      "root": "backend",
+      "entrypoint": "app/main.py"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "backend"
       }
     },
-    "headers": [
-      {
-        "source": "/api/(.*)",
-        "headers": [
-          { "key": "Access-Control-Allow-Origin", "value": "*" },
-          { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, PATCH, OPTIONS" },
-          { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" },
-          { "key": "Access-Control-Allow-Credentials", "value": "false" }
-        ]
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "frontend"
       }
-    ]
-  }
+    }
+  ]
+}
