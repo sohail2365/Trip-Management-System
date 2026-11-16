@@ -67,17 +67,14 @@ async def _fetch_trip_full(db: AsyncSession, trip_id: int) -> Trip | None:
 async def _sync_staff_payments(db: AsyncSession, trip: Trip):
     """
     Trip ke saare vehicles ke driver/conductor salaries ke liye
-    staff_payments entries banao. Purane (is trip ke) delete karo pehle.
+    staff_payments entries banao. Purane delete karo pehle.
     """
-    # Delete existing trip-linked payments
-    await db.execute(
-        delete(StaffPayment).where(StaffPayment.trip_id == trip.id)
-    )
+    # Purane payments delete karein (SQL query se)
+    await db.execute(delete(StaffPayment).where(StaffPayment.trip_id == trip.id))
     await db.flush()
 
-    # Create new
+    # Naye payments create karein
     for tv in trip.vehicles:
-        # Driver
         if float(tv.salary) > 0:
             db.add(StaffPayment(
                 staff_type="driver",
@@ -90,7 +87,6 @@ async def _sync_staff_payments(db: AsyncSession, trip: Trip):
                 source="trip",
             ))
 
-        # Conductor
         if tv.conductor_id and float(tv.conductor_salary) > 0:
             db.add(StaffPayment(
                 staff_type="conductor",
@@ -104,7 +100,6 @@ async def _sync_staff_payments(db: AsyncSession, trip: Trip):
             ))
 
     await db.flush()
-
 
 # ═══════════════════════════════════════════════════════
 # CREATE
@@ -377,15 +372,16 @@ async def update_trip(
     if "client_id" in data and not await db.get(Client, data["client_id"]):
         raise HTTPException(404, "Client nahi mila")
 
+    # Update simple fields
     for key, value in data.items():
         setattr(trip, key, value)
 
     if "travel_date" in data and "travel_day" not in data:
         trip.travel_day = compute_day(trip.travel_date)
 
+    # Replace Waypoints
     if waypoints_data is not None:
-        for wp in list(trip.waypoints):
-            await db.delete(wp)
+        await db.execute(delete(TripWaypoint).where(TripWaypoint.trip_id == trip.id))
         await db.flush()
         for idx, wp in enumerate(waypoints_data, start=1):
             db.add(TripWaypoint(
@@ -395,6 +391,7 @@ async def update_trip(
                 arrival_time=wp.get("arrival_time"),
             ))
 
+    # Replace Vehicles
     if vehicles_data is not None:
         if not vehicles_data:
             raise HTTPException(400, "Kam az kam ek vehicle zaroori hai")
@@ -413,8 +410,7 @@ async def update_trip(
         if existing_rate is None:
             existing_rate = await get_effective_rate(db)
 
-        for tv in list(trip.vehicles):
-            await db.delete(tv)
+        await db.execute(delete(TripVehicle).where(TripVehicle.trip_id == trip.id))
         await db.flush()
 
         for idx, v in enumerate(vehicles_data, start=1):
@@ -437,18 +433,23 @@ async def update_trip(
             ))
         await db.flush()
 
+    # Recalculate fuel if distance changed but vehicles didn't
     if "distance_km" in data and vehicles_data is None:
         for tv in trip.vehicles:
             litres = float(trip.distance_km) / float(tv.mileage_kmpl)
             tv.fuel_expense = round(litres * float(tv.diesel_rate), 2)
         await db.flush()
-        
+
+    # Refresh trip, recalculate profit and sync payments
     trip = await _fetch_trip_full(db, trip.id)
     trip.net_profit = calc_trip_profit(trip)
-
+    
     await _sync_staff_payments(db, trip)
 
     await db.commit()
+
+    trip = await _fetch_trip_full(db, trip.id)
+    return trip
 
 
 # ═══════════════════════════════════════════════════════
