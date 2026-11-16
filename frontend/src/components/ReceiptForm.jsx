@@ -3,6 +3,7 @@ import api from '../api/client';
 import { Input, Select } from './ui/Input';
 import PhoneField from './ui/PhoneField';
 import Button from './ui/Button';
+import TimeSelect from './ui/TimeSelect';
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -279,7 +280,11 @@ export default function ReceiptForm({ receipt = null, onCreated, onUpdated, onCa
           <div className="grid grid-cols-2 gap-3">
             <Input label="Receipt Date" type="date" value={form.receipt_date} onChange={(e) => update('receipt_date', e.target.value)} required />
             <Input label="Travel Date (optional)" type="date" value={form.travel_date} onChange={(e) => update('travel_date', e.target.value)} />
-            <Input label="Departure Time" value={form.travel_time} onChange={(e) => update('travel_time', e.target.value)} placeholder="08:30 AM" />
+            <TimeSelect
+              label="Departure Time"
+              value={form.travel_time}
+              onChange={(v) => update('travel_time', v)}
+            />
             <div>
               <label className="block text-xs font-medium text-content-secondary mb-1">Day (auto)</label>
               <div className="px-3 py-2 text-sm bg-surface-bg border border-surface-border rounded-lg text-content-secondary">

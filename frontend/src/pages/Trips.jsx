@@ -25,6 +25,7 @@ export default function Trips() {
     status_filter: '',
     from_date: '',
     to_date: '',
+    search: '',
   });
 
   async function loadTrips() {
@@ -34,6 +35,7 @@ export default function Trips() {
       if (filters.status_filter) params.status_filter = filters.status_filter;
       if (filters.from_date) params.from_date = filters.from_date;
       if (filters.to_date) params.to_date = filters.to_date;
+      if (filters.search) params.search = filters.search;
 
       const res = await api.get('/trips', { params });
       setTrips(res.data);
@@ -102,7 +104,7 @@ export default function Trips() {
       {/* Filters */}
       <Card className="mb-6">
         <CardBody>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <Select
               label="Status"
               value={filters.status_filter}
@@ -114,6 +116,19 @@ export default function Trips() {
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
             </Select>
+
+            <div>
+              <label className="block text-xs font-medium text-content-secondary mb-1">
+                Search Location
+              </label>
+              <input
+                type="text"
+                value={filters.search}
+                onChange={(e) => update('search', e.target.value)}
+                placeholder="e.g. Raiwind"
+                className="w-full px-3 py-2 text-sm bg-surface border border-surface-border rounded-lg text-content focus:outline-none focus:ring-2 focus:ring-brand/40"
+              />
+            </div>
 
             <div>
               <label className="block text-xs font-medium text-content-secondary mb-1">
@@ -143,7 +158,7 @@ export default function Trips() {
               <Button
                 variant="secondary"
                 onClick={() =>
-                  setFilters({ status_filter: '', from_date: '', to_date: '' })
+                  setFilters({ status_filter: '', from_date: '', to_date: '', search: '' })
                 }
                 className="w-full"
               >

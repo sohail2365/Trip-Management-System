@@ -1,6 +1,6 @@
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, delete, update
+from sqlalchemy import select, delete, update, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -177,12 +177,12 @@ async def create_trip(
 # ═══════════════════════════════════════════════════════
 # LIST
 # ═══════════════════════════════════════════════════════
-
 @router.get("", response_model=list[TripOut])
 async def list_trips(
     status_filter: str | None = None,
     client_id: int | None = None,
     vehicle_id: int | None = None,
+    search: str | None = None, # <-- Naya search parameter
     from_date: date | None = None,
     to_date: date | None = None,
     db: AsyncSession = Depends(get_db),
@@ -198,10 +198,23 @@ async def list_trips(
         query = query.where(Trip.client_id == client_id)
     if vehicle_id:
         query = query.join(TripVehicle).where(TripVehicle.vehicle_id == vehicle_id)
+    
+    # Search filter (Source, Destination, ya Waypoints mein dhoondein)
+    if search:
+        search_term = f"%{search}%"
+        query = query.where(
+            or_(
+                Trip.source.ilike(search_term),
+                Trip.destination.ilike(search_term),
+                Trip.waypoints.any(TripWaypoint.stop_name.ilike(search_term))
+            )
+        )
+
     if from_date:
         query = query.where(Trip.travel_date >= from_date)
     if to_date:
         query = query.where(Trip.travel_date <= to_date)
+    
     query = query.order_by(Trip.travel_date.desc()).distinct()
     result = await db.execute(query)
     return result.scalars().all()
